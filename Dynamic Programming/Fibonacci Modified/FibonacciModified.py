@@ -8,9 +8,27 @@ import requests
 import filecmp
 import threading
 
-def foo():
+def fibonacciModified(t1, t2, n):
     # use some function for hackerrank
-    return None
+    # solved with tabulation bc it's dp
+    '''
+    # tabulation array init
+    arr = [0] * n
+    arr[0] = t1
+    arr[1] = t2
+
+    for i in range(2, n):
+        arr[i] = arr[i - 2] + (arr[i - 1])**2
+    return arr[n - 1]
+    '''
+
+    # reduced to space complexity of (O(1))
+    for _ in range(2, n):
+        t3 = t1 + t2**2
+        t1 = t2
+        t2 = t3
+
+    return t3
 
 def main():
 	# use at least one function to solve problem
@@ -23,7 +41,14 @@ def main():
 	# pass data structure into foo(), do not declare global vars
 
 	# print to stdout with print() if function returns a value
-    # be careful with whitespace!     
+    # be careful with whitespace!
+
+    data = input().split()
+    t1 = int(data[0])
+    t2 = int(data[1])
+    n = int(data[2])
+    print(fibonacciModified(t1, t2, n))
+
     return None
 
 # returns a list of files in the test directory for the problem

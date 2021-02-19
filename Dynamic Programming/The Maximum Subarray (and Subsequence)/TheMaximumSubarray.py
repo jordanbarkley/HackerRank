@@ -8,9 +8,61 @@ import requests
 import filecmp
 import threading
 
-def foo():
+def maxes(arr, n):
     # use some function for hackerrank
-    return None
+
+    '''
+    # no longer used.
+    # nlogn + n solution for only this problem
+
+    # max subsequence
+    # use a greedy algorithm. add all positives or take largest negative
+    sortedArr = sorted(arr)
+    index = bisect.bisect_left(sortedArr, 0)
+
+    # if it's not max index, there are positives
+    maxSubsequence = 0
+    if index != n:
+        for i in range(index, n):
+            maxSubsequence += sortedArr[i]
+    
+    # otherwise, we get the largest negative
+    else:
+        maxSubsequence = sortedArr[n - 1]
+    '''
+
+    '''
+    # no longer used, honestly terrible solution lol
+    # space complexity n^2
+    # time complexity n^2/2
+
+    # 2d array filled out with tabulation where dp[i][j] represents sum of arr[i] through arr[j]
+    dp = [[0 for _ in range(n)] for _ in range(n)]
+    maxSubarray = arr[0]
+    for i in range(n):
+        for j in range(i, n):
+            if i != j:
+                dp[i][j] = arr[j] + dp[i][j - 1]
+            else:
+                dp[i][j] = arr[i]
+            if dp[i][j] > maxSubarray:
+                maxSubarray = dp[i][j]
+    '''
+    
+    # same algorithm but without dp array
+    # also inlcudes maxSubsequence
+    maxSubarray = arr[0]
+    maxSubsequence = arr[0]
+    maxLocal = arr[0]
+    for i in range(1, n):
+        # maxSubbarray
+        maxLocal = max(arr[i], maxLocal + arr[i])
+        maxSubarray = max(maxSubarray, maxLocal)
+
+        # max Subsequence
+        maxSubsequence = max(max(maxSubsequence, maxSubsequence + arr[i]), arr[i])
+
+    return [maxSubarray, maxSubsequence]
 
 def main():
 	# use at least one function to solve problem
@@ -24,7 +76,17 @@ def main():
 
 	# print to stdout with print() if function returns a value
     # be careful with whitespace!     
-    return None
+
+    t = int(input())
+
+    for i in range(t):
+        n = int(input())
+        arr = list(map(int, input().split()))
+        result = maxes(arr, n)
+        
+        print(str(result[0]) + " " + str(result[1]), end="")
+        if i != t - 1:
+            print()
 
 # returns a list of files in the test directory for the problem
 def getFilePaths(relativeDirectory: str):
