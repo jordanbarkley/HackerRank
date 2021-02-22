@@ -76,26 +76,31 @@ def construct(n, k, x):
     return (prevNumCombinations - prevNumXs) % LIMITER
 
 
-def main():
-	# use at least one function to solve problem
-	# important for reading from stdin
-	# input():	reads line as string
-	# split():	seperates into list
-	# rstrip():	removes whitespace from input
+def main(inputFile, outputFile):
+    # do not use input() as this reads from sys.stdin directly
+    # we can't change sys.stdin across threads, sadly
+    # use the below instead
 
-	# get input into data structures
-	# pass data structure into foo(), do not declare global vars
+        # reading
+            # for line in inputFile:
+            # inputFile.readLine()
 
-	# print to stdout with print() if function returns a value
-    # be careful with whitespace!   
+	        # split():	seperates into list
+	        # rstrip():	removes whitespace from input
 
-    data = list(map(int, input().split()))
+        # writing
+            # outputFile.write(<str> + '\n')
+            # be careful with whitespace!   
+
+    rawData = inputFile.readline()
+
+    data = list(map(int, rawData.split()))
     n = data[0]
     k = data[1]
     x = data[2]
 
     result = construct(n, k, x)
-    print(result)
+    outputFile.write(str(result) + '\n')    
 
 # returns a list of files in the test directory for the problem
 def getFilePaths(relativeDirectory: str):
@@ -125,39 +130,41 @@ def runLocalTests():
     inputFiles = getFilePaths("tests/input")
     expectedOutputFiles = getFilePaths("tests/output")
 
-    # save original stdout
-    commandLine = sys.stdout
+    threads = list()
     
     for i in range(len(inputFiles)):
         # open file for input/output from hackerank
-        inputFile = open(inputFiles[i], mode="r")
-        expectedOutputFile = open(expectedOutputFiles[i], mode="r")
-
-        # create a file to replace stdout
-        outputFile = open(os.path.join(os.path.dirname(__file__), os.path.basename(expectedOutputFile.name)), mode="w")
-
-        # redirect stdin/stdout
-        sys.stdin = inputFile
-        sys.stdout = outputFile
+        inputFileName = inputFiles[i] 
+        expectedOutputFileName = expectedOutputFiles[i]
+        outputFileName = os.path.join(os.path.dirname(__file__), os.path.basename(expectedOutputFileName))
         
-        # run test on new thread
-        threading.Thread(target=runTest(inputFile, outputFile, expectedOutputFile, commandLine)).start()
+        # run in a new subprocess
+        t = threading.Thread(target=runTest, args=[inputFileName, expectedOutputFileName, outputFileName])
+        threads.append(t)
+
+    # run threads
+    for t in threads:
+        t.start()
 
 # accepts an open file parameter
-def runTest(inputFile, outputFile, expectedOutputFile, commandLine):
-    main()
+def runTest(inputFileName, expectedOutputFileName, outputFileName):
+    # open files
+    inputFile = open(inputFileName, mode="r")
+    outputFile = open(outputFileName, mode="w+")
+
+    # run main with a given stdin
+    main(inputFile, outputFile)
 
     # close files
-    expectedOutputFile.close()
     inputFile.close()
     outputFile.close()
 
     # compare files and print result to command line
-    print("Test Case " + os.path.basename(inputFile.name) + ": ", end="", file=commandLine)
-    if filecmp.cmp(expectedOutputFile.name, outputFile.name, shallow=True):
-        print("PASSED", file=commandLine)
+    printStr = "Test Case " + os.path.basename(inputFile.name) + ": "
+    if filecmp.cmp(expectedOutputFileName, outputFileName, shallow=True):
+        print(printStr + "PASSED")
     else:
-        print("FAILED", file=commandLine)
+        print(printStr + "FAILED")
 
 if __name__ == "__main__":
     # if in my vscode enviornment
@@ -166,4 +173,4 @@ if __name__ == "__main__":
 
     # if not
     else:
-        main()
+        main(sys.stdin, sys.stdout)
