@@ -18,7 +18,7 @@ def main(inputFile, outputFile):
 
         # reading
             # for line in inputFile:
-            # inputFile.readLine()
+            # inputFile.readline()
 
 	        # split():	seperates into list
 	        # rstrip():	removes whitespace from input
